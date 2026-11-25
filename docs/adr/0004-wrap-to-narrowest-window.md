@@ -2,7 +2,7 @@
 
 **Status:** Proposed
 **Date:** 2026-11-25
-**Deciders:** Florent
+**Deciders:** Maintainer
 
 ## Context
 
@@ -28,7 +28,6 @@ it overflow.
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low |
-| Learning value | Medium |
 | Testability | High: "min of widths" is easy to test |
 | Fit with Neovim conventions | High |
 
@@ -40,7 +39,6 @@ it overflow.
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low |
-| Learning value | Low |
 | Testability | Medium: depends on focus |
 | Fit with Neovim conventions | Medium |
 
@@ -54,7 +52,6 @@ and could flicker.
 | Dimension | Assessment |
 |---|---|
 | Complexity | High |
-| Learning value | High |
 | Testability | Low |
 | Fit with Neovim conventions | Uncertain |
 
@@ -75,7 +72,7 @@ smallest cost, and it never breaks the "fits the window" promise.
 - Easier: a single width per buffer keeps `layout` simple.
 - Harder: the handler must track which windows show which buffer.
   `vim.fn.win_findbuf(bufnr)` gives that.
-- Revisit: if early wrapping in wide splits bugs Florent in daily use,
+- Revisit: if early wrapping in wide splits is annoying in daily use,
   spike Option C. Status would then move to Superseded.
 
 ## Action Items

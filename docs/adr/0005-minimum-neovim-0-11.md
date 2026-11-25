@@ -2,11 +2,11 @@
 
 **Status:** Proposed
 **Date:** 2026-11-25
-**Deciders:** Florent
+**Deciders:** Maintainer
 
 ## Context
 
-The plugin is for Florent's own config first, which runs a current
+The plugin is built for personal use first, on a current
 Neovim. 0.11 is the release where core's diagnostics gained
 `virtual_lines`, and with it the `DiagnosticVirtualLines*` highlight
 groups we link to. Supporting older versions means fallbacks and a wider

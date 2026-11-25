@@ -2,7 +2,7 @@
 
 **Status:** Proposed | Accepted | Deprecated | Superseded by ADR-NNNN
 **Date:** YYYY-MM-DD
-**Deciders:** Florent
+**Deciders:** Maintainer
 
 ## Context
 
@@ -19,7 +19,6 @@ What we're doing.
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low / Med / High |
-| Learning value | |
 | Testability | |
 | Fit with Neovim conventions | |
 

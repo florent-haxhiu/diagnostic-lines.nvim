@@ -2,7 +2,7 @@
 
 **Status:** Proposed
 **Date:** 2026-11-25
-**Deciders:** Florent
+**Deciders:** Maintainer
 
 ## Context
 
@@ -30,7 +30,6 @@ Split the code into a **functional core** and an **imperative shell**:
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low to medium (a bit more upfront structure) |
-| Learning value | High: a pattern that carries over to any language |
 | Testability | High: layout tests are plain input → output |
 | Fit with Neovim conventions | High |
 
@@ -45,7 +44,6 @@ in the shell and passed in, which adds a little plumbing.
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low at first, high later |
-| Learning value | Low |
 | Testability | Low: needs headless Neovim for every test |
 | Fit with Neovim conventions | Medium (it's how core's handler is written) |
 

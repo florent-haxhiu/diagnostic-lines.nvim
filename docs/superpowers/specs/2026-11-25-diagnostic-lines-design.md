@@ -2,7 +2,6 @@
 
 **Date:** 2026-11-25
 **Status:** Draft, awaiting approval
-**Author:** Florent (with Claude)
 
 > The key decisions behind this design are recorded as ADRs in
 > [`docs/adr/`](../../adr/README.md). This doc is the overview; each ADR
@@ -15,18 +14,14 @@ hints) as **virtual lines underneath the line that caused it**, always on,
 for the whole buffer.
 
 Neovim 0.11 already ships a `virtual_lines` diagnostic handler that does
-something similar. This plugin exists for two reasons:
+something similar. This plugin exists to do the one thing core can't:
+core's handler lets long messages run off the right edge of the window,
+and that can't be configured through `vim.diagnostic.config()`. This
+plugin's end goal is to **wrap long messages** so they always fit the
+window.
 
-1. **Learning.** Florent wants to understand how Neovim draws this stuff:
-   namespaces, extmarks, `virt_lines`, and the diagnostic handler
-   interface. Building it by hand is the point, not a side effect.
-2. **One thing core can't do.** Core's handler lets long messages run off
-   the right edge of the window, and that can't be configured through
-   `vim.diagnostic.config()`. This plugin's end goal is to **wrap long
-   messages** so they always fit the window.
-
-It is built for Florent's own config first. Publishing it for others is
-fine but not a driver.
+It is built for personal use first. Publishing it for others is fine but
+not a driver.
 
 ## 2. What it looks like
 
@@ -93,11 +88,11 @@ local x = foo(bar, baz)
 
 | Approach | Trade-off |
 |---|---|
-| **A. Own diagnostic handler, rebuilt from scratch, then add wrapping** *(chosen)* | Most learning; ends with a feature core lacks. More work than B. |
-| B. Thin wrapper around core's `virtual_lines` (toggles, presets) | Quick and useful, but teaches almost nothing about rendering and can't add wrapping. |
-| C. Use core for a week first, design around annoyances | Zero code. Florent didn't have specific annoyances yet, so it doesn't give a direction. Can still run in parallel. |
+| **A. Own diagnostic handler, rebuilt from scratch, then add wrapping** *(chosen)* | Full control of layout; ends with a feature core lacks. More work than B. |
+| B. Thin wrapper around core's `virtual_lines` (toggles, presets) | Quick and useful, but can't add wrapping. |
+| C. Use core for a week first, design around annoyances | Zero code, but there were no specific annoyances to design around yet, so it gives no direction. Can still run in parallel. |
 
-Florent picked **A** ([ADR-0001](../../adr/0001-custom-diagnostic-handler.md)).
+Chosen: **A** ([ADR-0001](../../adr/0001-custom-diagnostic-handler.md)).
 
 Other decisions: [ADR-0002](../../adr/0002-configure-through-vim-diagnostic-config.md)
 (config via `vim.diagnostic.config()`),
@@ -179,7 +174,7 @@ UI API.
   (§6), we use the **narrowest window currently showing the buffer**, so
   nothing overflows in any of them. In a wider window the wrap will be a
   bit earlier than necessary; that's the accepted trade-off.
-  *(Claude's call: Florent can override.)*
+  *(Open to change.)*
 - Redraw on `WinResized` and `VimResized` for affected buffers, using the
   remembered diagnostics, so resizing a split rewraps.
 - If the available width gets silly-small (e.g. under 10 columns), stop

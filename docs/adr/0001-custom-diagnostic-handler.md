@@ -2,18 +2,15 @@
 
 **Status:** Accepted
 **Date:** 2026-11-25
-**Deciders:** Florent
+**Deciders:** Maintainer
 
 ## Context
 
 The goal is to show every diagnostic as virtual lines under the line
 that caused it. Neovim 0.11 already ships a `virtual_lines` handler that
-does this, so the plugin needs a reason to exist. There are two:
-
-1. Florent wants to learn how Neovim draws this (namespaces, extmarks,
-   `virt_lines`, the diagnostic handler interface).
-2. Core's handler lets long messages run off the edge of the window, and
-   that can't be configured. Wrapping them is the feature core lacks.
+does this, so the plugin needs a reason to exist: core's handler lets
+long messages run off the edge of the window, and that can't be
+configured. Wrapping them is the feature core lacks.
 
 `vim.diagnostic.handlers` is a public extension point: any table with
 `show(namespace, bufnr, diagnostics, opts)` and `hide(namespace, bufnr)`
@@ -31,12 +28,12 @@ Write our own handler from scratch, registered as
 | Dimension | Assessment |
 |---|---|
 | Complexity | Medium |
-| Learning value | High: touches every part of the rendering pipeline |
+| Control over layout | Full |
 | Testability | High, if layout is kept pure (see ADR-0003) |
 | Fit with Neovim conventions | High: uses the official extension point |
 
-**Pros:** You learn the most. You own the layout code, so wrapping is
-possible. No dependency on core internals.
+**Pros:** We own the layout code, so wrapping is possible. The structure
+is ours to design. No dependency on core internals.
 **Cons:** It re-does work core has already done. Bugs core has fixed may
 need fixing again.
 
@@ -45,20 +42,20 @@ need fixing again.
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low |
-| Learning value | Low |
+| Control over layout | None |
 | Testability | Low (little logic of our own) |
 | Fit with Neovim conventions | High |
 
 **Pros:** Quick. Behaviour matches core exactly.
 **Cons:** It can't add wrapping, because core's layout can't be changed
-from outside. You'd learn almost nothing about rendering.
+from outside.
 
 ### Option C: Copy core's handler source and modify it
 
 | Dimension | Assessment |
 |---|---|
 | Complexity | Medium |
-| Learning value | Medium: reading, not designing |
+| Control over layout | Full |
 | Testability | Low: core's code isn't structured for unit tests |
 | Fit with Neovim conventions | Medium |
 
@@ -68,10 +65,10 @@ tangled. Upstream changes would need to be merged in by hand.
 
 ## Trade-off Analysis
 
-The learning goal rules out B, and wrapping can't be done without owning
-the layout code. A and C both own it, but C keeps core's structure, which
-works against testability and against designing it yourself. A costs
-more effort, and that effort is the point.
+B can't deliver wrapping, so it's out. A and C both own the layout code,
+but C inherits core's structure, which works against testability
+(ADR-0003). A costs more effort up front but ends with code designed
+around the feature that justifies the plugin.
 
 The handler interface is the Strategy pattern: core is the context, and
 `virtual_text`, `virtual_lines` and ours are interchangeable strategies.
@@ -83,7 +80,7 @@ Core never changes to accept ours, which is open/closed in action.
 - Harder: matching core's polish. Edge cases like tabs, multibyte text
   and end-of-line columns are ours to handle.
 - Revisit: if core ever adds wrapping, decide whether this plugin is
-  still worth keeping or should become a learning archive.
+  still worth keeping.
 
 ## Action Items
 

@@ -2,7 +2,7 @@
 
 **Status:** Proposed
 **Date:** 2026-11-25
-**Deciders:** Florent
+**Deciders:** Maintainer
 
 ## Context
 
@@ -33,7 +33,6 @@ There is no `setup()`.
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low |
-| Learning value | Medium: teaches how core resolves handler options |
 | Testability | High: options arrive as a plain table |
 | Fit with Neovim conventions | High: same as core's own handlers |
 
@@ -48,7 +47,6 @@ place for global, non-diagnostic options (there aren't any yet).
 | Dimension | Assessment |
 |---|---|
 | Complexity | Low |
-| Learning value | Low |
 | Testability | Medium |
 | Fit with Neovim conventions | Medium |
 
