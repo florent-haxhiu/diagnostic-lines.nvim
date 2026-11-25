@@ -13,12 +13,18 @@ local M = {}
 ---@type table<integer, table<integer, { diagnostics: vim.Diagnostic[], opts: table }>>
 local state = {}
 
---- Width of the narrowest window text area showing `bufnr`.
+--- Width of the narrowest window text area showing `bufnr` (ADR-0004).
+--- Virtual lines belong to the buffer, so they must fit every window.
 ---@param bufnr integer
----@return integer|nil
+---@return integer|nil nil when the buffer is in no window.
 function M.text_width(bufnr)
-  local _ = bufnr
-  return nil
+  local narrowest
+  for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
+    local gutter = vim.fn.getwininfo(win)[1].textoff
+    local width = api.nvim_win_get_width(win) - gutter
+    narrowest = narrowest and math.min(narrowest, width) or width
+  end
+  return narrowest
 end
 
 --- Group diagnostics into layout items per (clamped) line number.
@@ -71,7 +77,7 @@ function M.show(namespace, bufnr, diagnostics, opts)
   local cfg = config.resolve(opts and opts.diagnostic_lines)
   render.clear(namespace, bufnr)
 
-  local width = M.text_width(bufnr)
+  local width = cfg.wrap and M.text_width(bufnr) or nil
   for lnum, items in pairs(items_by_line(bufnr, diagnostics, cfg)) do
     render.draw(namespace, bufnr, lnum, layout.build(items, width))
   end
@@ -89,6 +95,27 @@ function M.hide(namespace, bufnr)
   if state[bufnr] then
     state[bufnr][namespace] = nil
   end
+end
+
+--- Redraw from the remembered diagnostics, e.g. after a resize.
+---@param bufnr? integer nil = every tracked buffer.
+function M.refresh(bufnr)
+  local targets = bufnr and { [bufnr] = state[bufnr] } or state
+  for b, per_namespace in pairs(targets) do
+    if not api.nvim_buf_is_valid(b) then
+      state[b] = nil
+    else
+      for namespace, last in pairs(per_namespace) do
+        M.show(namespace, b, last.diagnostics, last.opts)
+      end
+    end
+  end
+end
+
+--- Drop everything remembered about a buffer (it's being wiped).
+---@param bufnr integer
+function M.forget(bufnr)
+  state[bufnr] = nil
 end
 
 return M

@@ -40,10 +40,17 @@ local T = MiniTest.new_set({
     pre_case = function()
       buf = vim.api.nvim_create_buf(true, true)
       vim.api.nvim_set_current_buf(buf)
-      vim.diagnostic.config({ virtual_text = false, virtual_lines = false, diagnostic_lines = true })
+      vim.diagnostic.config({
+        virtual_text = false,
+        virtual_lines = false,
+        signs = false,
+        diagnostic_lines = true,
+      })
       ns = vim.api.nvim_create_namespace("test." .. tostring(buf))
     end,
     post_case = function()
+      vim.cmd("silent! only")
+      vim.o.number = false
       vim.diagnostic.reset()
       vim.api.nvim_buf_delete(buf, { force = true })
     end,
@@ -163,6 +170,97 @@ T["format returning a non-string is shown as text"] = function()
   set_lines({ "a" })
   set(ns, { {} })
   eq(virt(ns), { [0] = { "└──── E: 42" } })
+end
+
+-- Wrapping to the window ----------------------------------------------------
+
+local handler = require("diagnostic-lines.handler")
+
+local LONG = "this is a very long message that would otherwise run off the edge of the window"
+
+--- Put an unrelated window next to the current one (a lone window can't
+--- be resized) and set the current window's width.
+local function narrow_current(width)
+  vim.cmd("vnew | wincmd p")
+  vim.api.nvim_win_set_width(0, width)
+end
+
+local function row_count(source_ns, bufnr)
+  return #(virt(source_ns, bufnr)[0] or {})
+end
+
+T["text_width()"] = MiniTest.new_set()
+
+T["text_width()"]["subtracts the gutter"] = function()
+  narrow_current(40)
+  vim.wo.number = true
+  local textoff = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1].textoff
+  eq(textoff > 0, true)
+  eq(handler.text_width(buf), 40 - textoff)
+end
+
+T["text_width()"]["uses the narrowest window showing the buffer"] = function()
+  vim.cmd("vsplit")
+  vim.api.nvim_win_set_width(0, 30)
+  eq(handler.text_width(buf), 30)
+end
+
+T["text_width()"]["is nil for a buffer in no window"] = function()
+  local hidden = vim.api.nvim_create_buf(true, true)
+  eq(handler.text_width(hidden), nil)
+  vim.api.nvim_buf_delete(hidden, { force = true })
+end
+
+T["wrapping"] = MiniTest.new_set()
+
+T["wrapping"]["wraps long messages to the window"] = function()
+  narrow_current(30)
+  set_lines({ "x" })
+  set(ns, { { message = LONG } })
+  eq(row_count(ns) > 1, true)
+end
+
+T["wrapping"]["wrap = false keeps one row"] = function()
+  vim.diagnostic.config({ diagnostic_lines = { wrap = false } })
+  narrow_current(30)
+  set_lines({ "x" })
+  set(ns, { { message = LONG } })
+  eq(row_count(ns), 1)
+end
+
+T["wrapping"]["refresh() rewraps after a resize"] = function()
+  narrow_current(70)
+  set_lines({ "x" })
+  set(ns, { { message = LONG } })
+  local wide = row_count(ns)
+
+  vim.api.nvim_win_set_width(0, 30)
+  handler.refresh(buf)
+  eq(row_count(ns) > wide, true)
+end
+
+T["wrapping"]["VimResized rewraps"] = function()
+  narrow_current(70)
+  set_lines({ "x" })
+  set(ns, { { message = LONG } })
+  local wide = row_count(ns)
+
+  vim.api.nvim_win_set_width(0, 30)
+  vim.api.nvim_exec_autocmds("VimResized", {})
+  eq(row_count(ns) > wide, true)
+end
+
+T["wrapping"]["hidden buffer is unwrapped, then rewrapped when shown"] = function()
+  local hidden = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_lines(hidden, 0, -1, false, { "x" })
+  vim.diagnostic.set(ns, hidden, { { lnum = 0, col = 0, severity = ERROR, message = LONG } })
+  eq(row_count(ns, hidden), 1)
+
+  narrow_current(30)
+  vim.api.nvim_win_set_buf(0, hidden)
+  eq(row_count(ns, hidden) > 1, true)
+
+  vim.api.nvim_buf_delete(hidden, { force = true })
 end
 
 return T
