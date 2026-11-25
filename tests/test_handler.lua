@@ -172,6 +172,13 @@ T["format returning a non-string is shown as text"] = function()
   eq(virt(ns), { [0] = { "└──── E: 42" } })
 end
 
+T["virtual lines scroll horizontally with the text (nowrap)"] = function()
+  set_lines({ "a" })
+  set(ns, { {} })
+  local mark = vim.api.nvim_buf_get_extmarks(buf, render.namespace_for(ns), 0, -1, { details = true })[1]
+  eq(mark[4].virt_lines_overflow, "scroll")
+end
+
 -- Wrapping to the window ----------------------------------------------------
 
 local handler = require("diagnostic-lines.handler")
