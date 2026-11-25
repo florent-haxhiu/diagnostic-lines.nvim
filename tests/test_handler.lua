@@ -139,4 +139,30 @@ T["each diagnostic namespace is drawn and hidden independently"] = function()
   eq(virt(ns2), { [0] = { "└──── E: b" } })
 end
 
+T["format returning nil hides the diagnostic, like core"] = function()
+  vim.diagnostic.config({
+    diagnostic_lines = {
+      format = function(d)
+        return d.severity == ERROR and d.message or nil
+      end,
+    },
+  })
+  set_lines({ "a" })
+  set(ns, { { message = "kept" }, { severity = WARN, message = "dropped" } })
+  eq(virt(ns), { [0] = { "└──── E: kept" } })
+end
+
+T["format returning a non-string is shown as text"] = function()
+  vim.diagnostic.config({
+    diagnostic_lines = {
+      format = function()
+        return 42
+      end,
+    },
+  })
+  set_lines({ "a" })
+  set(ns, { {} })
+  eq(virt(ns), { [0] = { "└──── E: 42" } })
+end
+
 return T

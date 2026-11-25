@@ -39,12 +39,20 @@ local function items_by_line(bufnr, diagnostics, cfg)
       local col = vim.fn.strdisplaywidth(line:sub(1, d.col or 0))
       col = math.min(col, math.max(vim.fn.strdisplaywidth(line) - 1, 0))
 
-      by_line[lnum] = by_line[lnum] or {}
-      table.insert(by_line[lnum], {
-        col = col,
-        severity = d.severity,
-        message = cfg.format and cfg.format(d) or d.message,
-      })
+      -- Like core: format() returning nil hides the diagnostic.
+      local message = d.message
+      if cfg.format then
+        message = cfg.format(d)
+      end
+
+      if message ~= nil then
+        by_line[lnum] = by_line[lnum] or {}
+        table.insert(by_line[lnum], {
+          col = col,
+          severity = d.severity,
+          message = tostring(message),
+        })
+      end
     end
   end)
 
