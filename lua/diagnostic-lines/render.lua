@@ -31,6 +31,8 @@ function M.draw(source_ns, bufnr, lnum, rows, id)
     id = id,
     virt_lines = rows,
     virt_lines_leftcol = false,
+    -- Scroll with the text under 'nowrap' so connectors stay lined up.
+    virt_lines_overflow = "scroll",
   })
 end
 

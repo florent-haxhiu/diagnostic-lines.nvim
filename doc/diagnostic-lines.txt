@@ -1,0 +1,99 @@
+*diagnostic-lines.txt*    Diagnostics as virtual lines, wrapped to fit
+
+==============================================================================
+CONTENTS                                             *diagnostic-lines-contents*
+
+  1. Introduction ............................ |diagnostic-lines|
+  2. Configuration ........................... |diagnostic-lines-config|
+  3. Highlights .............................. |diagnostic-lines-highlights|
+  4. Behaviour ............................... |diagnostic-lines-behaviour|
+
+==============================================================================
+1. INTRODUCTION                                               *diagnostic-lines*
+
+Shows every diagnostic as virtual lines underneath the line that caused it,
+with connectors pointing at the exact column: >
+
+    local x = foo(bar, baz)
+              │   └──── W: unused local 'bar'
+              └──────── E: undefined global 'foo'
+<
+Unlike the built-in `virtual_lines` handler, long messages wrap to fit the
+window, and the connectors keep running down the side: >
+
+    local x = foo(bar, baz)
+              │   └──── W: this is a very long message that would
+              │            otherwise run off the edge of the window
+              └──────── E: undefined global 'foo'
+<
+Requires Neovim 0.11 or newer.
+
+==============================================================================
+2. CONFIGURATION                                       *diagnostic-lines-config*
+
+There is no `setup()` function. The plugin registers a diagnostic handler
+named `diagnostic_lines`. Enable and configure it with
+|vim.diagnostic.config()|, like any built-in handler: >lua
+
+    vim.diagnostic.config({
+      virtual_text = false,
+      diagnostic_lines = {
+        wrap = true,
+      },
+    })
+<
+Per-namespace configuration and `severity` filtering work as they do for
+the built-in handlers.
+
+Options:
+
+    wrap      boolean (default: true)
+              Wrap long messages to fit the window.
+
+    format    function(diagnostic): string? (default: nil)
+              Replaces the message text shown for a diagnostic. Return
+              nil to hide that diagnostic, as with the built-in format.
+
+Toggle the handler: >lua
+
+    vim.diagnostic.config({ diagnostic_lines = false })
+    vim.diagnostic.config({ diagnostic_lines = true })
+<
+This plugin never changes your other diagnostic settings. If you also enable
+the built-in `virtual_lines` or `virtual_text`, both are shown; turn off the
+ones you don't want.
+
+==============================================================================
+3. HIGHLIGHTS                                      *diagnostic-lines-highlights*
+
+The built-in groups are reused, so colourschemes work unchanged:
+
+    DiagnosticVirtualLinesError     errors
+    DiagnosticVirtualLinesWarn      warnings
+    DiagnosticVirtualLinesInfo      information
+    DiagnosticVirtualLinesHint      hints
+
+==============================================================================
+4. BEHAVIOUR                                         *diagnostic-lines-behaviour*
+
+Several diagnostics on one line ~
+    The rightmost is drawn first; connectors run down for the others.
+    Diagnostics at the same column stack, most severe first.
+
+Multi-line messages ~
+    Each line of the message gets its own row.
+
+Splits ~
+    Virtual lines belong to the buffer, not the window, so a buffer shown in
+    several windows shares one layout. Messages wrap to the narrowest of
+    those windows so they fit in all of them. Resizing rewraps.
+
+Very narrow windows ~
+    With fewer than 10 columns left for the message, wrapping turns off
+    instead of drawing a few characters per row.
+
+'nowrap' and horizontal scrolling ~
+    The virtual lines scroll with the text, so connectors stay under the
+    right characters.
+
+ vim:tw=78:ts=8:ft=help:norl:
