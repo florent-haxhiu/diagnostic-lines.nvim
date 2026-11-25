@@ -1,6 +1,6 @@
 # ADR-0003: Pure layout core, thin rendering shell
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-25
 **Deciders:** Maintainer
 

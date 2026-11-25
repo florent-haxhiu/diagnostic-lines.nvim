@@ -1,7 +1,7 @@
 # diagnostic-lines.nvim — Design
 
 **Date:** 2026-11-25
-**Status:** Draft, awaiting approval
+**Status:** Approved (PR #1)
 
 > The key decisions behind this design are recorded as ADRs in
 > [`docs/adr/`](../../adr/README.md). This doc is the overview; each ADR

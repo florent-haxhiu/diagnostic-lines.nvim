@@ -14,10 +14,10 @@ ADRs zoom in on the individual decisions behind it.
 | # | Title | Status |
 |---|---|---|
 | [0001](0001-custom-diagnostic-handler.md) | Build as a custom `vim.diagnostic` handler | Accepted |
-| [0002](0002-configure-through-vim-diagnostic-config.md) | Configure through `vim.diagnostic.config()`, no `setup()` | Proposed |
-| [0003](0003-pure-layout-core.md) | Pure layout core, thin rendering shell | Proposed |
-| [0004](0004-wrap-to-narrowest-window.md) | Wrap to the narrowest window showing the buffer | Proposed |
-| [0005](0005-minimum-neovim-0-11.md) | Require Neovim 0.11+ | Proposed |
+| [0002](0002-configure-through-vim-diagnostic-config.md) | Configure through `vim.diagnostic.config()`, no `setup()` | Accepted |
+| [0003](0003-pure-layout-core.md) | Pure layout core, thin rendering shell | Accepted |
+| [0004](0004-wrap-to-narrowest-window.md) | Wrap to the narrowest window showing the buffer | Accepted |
+| [0005](0005-minimum-neovim-0-11.md) | Require Neovim 0.11+ | Accepted |
 
 ## Writing a new ADR
 
