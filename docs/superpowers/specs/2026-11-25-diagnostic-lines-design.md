@@ -4,6 +4,10 @@
 **Status:** Draft, awaiting approval
 **Author:** Florent (with Claude)
 
+> The key decisions behind this design are recorded as ADRs in
+> [`docs/adr/`](../../adr/README.md). This doc is the overview; each ADR
+> has the options and trade-offs for one decision.
+
 ## 1. Intent
 
 A Neovim plugin that shows every LSP diagnostic (errors, warnings, info,
@@ -93,7 +97,13 @@ local x = foo(bar, baz)
 | B. Thin wrapper around core's `virtual_lines` (toggles, presets) | Quick and useful, but teaches almost nothing about rendering and can't add wrapping. |
 | C. Use core for a week first, design around annoyances | Zero code. Florent didn't have specific annoyances yet, so it doesn't give a direction. Can still run in parallel. |
 
-Florent picked **A**.
+Florent picked **A** ([ADR-0001](../../adr/0001-custom-diagnostic-handler.md)).
+
+Other decisions: [ADR-0002](../../adr/0002-configure-through-vim-diagnostic-config.md)
+(config via `vim.diagnostic.config()`),
+[ADR-0003](../../adr/0003-pure-layout-core.md) (pure layout core),
+[ADR-0004](../../adr/0004-wrap-to-narrowest-window.md) (narrowest-window
+wrapping), [ADR-0005](../../adr/0005-minimum-neovim-0-11.md) (Neovim 0.11+).
 
 ## 8. Design
 
