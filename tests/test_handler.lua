@@ -263,4 +263,75 @@ T["wrapping"]["hidden buffer is unwrapped, then rewrapped when shown"] = functio
   vim.api.nvim_buf_delete(hidden, { force = true })
 end
 
+-- Redraws after edits, gutter changes and bufnr 0 -----------------------------
+
+--- Widest row (display cells) drawn for `source_ns` in `bufnr`.
+local function widest(source_ns, bufnr)
+  local w = 0
+  for _, rows in pairs(virt(source_ns, bufnr)) do
+    for _, text in ipairs(rows) do
+      w = math.max(w, vim.fn.strdisplaywidth(text))
+    end
+  end
+  return w
+end
+
+T["redraws"] = MiniTest.new_set()
+
+T["redraws"]["refresh() follows lines that moved after edits"] = function()
+  set_lines({ "a", "b", "c" })
+  set(ns, { { lnum = 2, message = "on c" } })
+  vim.api.nvim_buf_set_lines(buf, 0, 0, false, { "new 1", "new 2" })
+  eq(virt(ns), { [4] = { "└──── E: on c" } })
+
+  handler.refresh(buf)
+  eq(virt(ns), { [4] = { "└──── E: on c" } })
+end
+
+T["redraws"]["sync_width() rewraps when the gutter grows"] = function()
+  narrow_current(40)
+  set_lines({ "x" })
+  set(ns, { { message = LONG } })
+  eq(widest(ns) <= handler.text_width(buf), true)
+
+  vim.wo.number = true
+  handler.sync_width(buf)
+  eq(widest(ns) <= handler.text_width(buf), true)
+end
+
+T["redraws"]["bufnr 0 leaves nothing behind for other buffers"] = function()
+  set_lines({ "a" })
+  set(ns, { { message = "error in A" } })
+  vim.diagnostic.show(ns, 0)
+  vim.diagnostic.hide(ns, 0)
+
+  local other = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_set_current_buf(other)
+  vim.api.nvim_exec_autocmds("VimResized", {})
+  eq(virt(ns, other), {})
+  vim.api.nvim_buf_delete(other, { force = true })
+end
+
+T["redraws"]["end to end: wrapped text fits once the sign column appears"] = function()
+  local child = MiniTest.new_child_neovim()
+  child.start({ "--cmd", "set rtp^=" .. vim.fn.getcwd(), "--cmd", "runtime plugin/diagnostic-lines.lua" })
+  child.o.lines, child.o.columns = 12, 50
+  child.lua([[
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "x" })
+    vim.diagnostic.config({ virtual_text = false, diagnostic_lines = true }) -- signs left on
+    vim.diagnostic.set(vim.api.nvim_create_namespace("e2e"), 0, {
+      { lnum = 0, col = 0, severity = 1, message = ...  },
+    })
+  ]], { LONG })
+  child.cmd("redraw")
+  child.lua("vim.wait(50)")
+  child.cmd("redraw")
+  local screen = table.concat(vim.tbl_map(function(l)
+    return table.concat(l)
+  end, child.get_screenshot().text), "\n")
+  child.stop()
+  -- the message's last word is fully on screen, not cut at the edge
+  eq(screen:find("window", 1, true) ~= nil, true)
+end
+
 return T

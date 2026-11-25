@@ -24,8 +24,11 @@ end
 ---@param bufnr integer
 ---@param lnum integer 0-based line the rows go under.
 ---@param rows DiagnosticLines.Row[]
-function M.draw(source_ns, bufnr, lnum, rows)
-  api.nvim_buf_set_extmark(bufnr, M.namespace_for(source_ns), lnum, 0, {
+---@param id? integer Existing extmark to update in place.
+---@return integer id
+function M.draw(source_ns, bufnr, lnum, rows, id)
+  return api.nvim_buf_set_extmark(bufnr, M.namespace_for(source_ns), lnum, 0, {
+    id = id,
     virt_lines = rows,
     virt_lines_leftcol = false,
   })

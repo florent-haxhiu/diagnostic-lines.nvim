@@ -37,6 +37,16 @@ T["wrap()"]["empty text gives one empty line"] = function()
   eq(wrap.wrap("", 10), { "" })
 end
 
+T["wrap()"]["carriage returns are dropped"] = function()
+  eq(wrap.wrap("a\r\nb", nil), { "a", "b" })
+  eq(wrap.wrap("a\r\nb", 10), { "a", "b" })
+end
+
+T["wrap()"]["trailing newlines don't add empty lines"] = function()
+  eq(wrap.wrap("a\n", nil), { "a" })
+  eq(wrap.wrap("a\n\n", 10), { "a" })
+end
+
 T["wrap()"]["nil width only splits on newlines"] = function()
   eq(wrap.wrap("hello world", nil), { "hello world" })
   eq(wrap.wrap("a\nb", nil), { "a", "b" })

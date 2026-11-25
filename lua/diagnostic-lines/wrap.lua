@@ -65,7 +65,12 @@ end
 ---@param width integer|nil nil = only split on newlines.
 ---@return string[]
 function M.wrap(text, width)
-  local pieces = vim.split(text, "\n", { plain = true })
+  local pieces = vim.split(text:gsub("\r", ""), "\n", { plain = true })
+  -- A trailing newline shouldn't draw an empty row (one empty line stays
+  -- so an empty message still gets its prefix).
+  while #pieces > 1 and pieces[#pieces] == "" do
+    pieces[#pieces] = nil
+  end
   if not width then
     return pieces
   end

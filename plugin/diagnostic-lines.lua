@@ -53,6 +53,27 @@ api.nvim_create_autocmd("BufWinEnter", {
   end,
 })
 
+-- The gutter (sign/number/fold columns) can change width without any
+-- resize event, e.g. when signcolumn=auto first shows a sign. At the end
+-- of each redraw (when gutters are settled), rewrap any buffer whose
+-- width moved. The rewrap itself is scheduled outside the redraw.
+local pending = {}
+api.nvim_set_decoration_provider(api.nvim_create_namespace("diagnostic_lines.watch"), {
+  on_end = function()
+    for _, bufnr in ipairs(handler.changed_buffers()) do
+      if not pending[bufnr] then
+        pending[bufnr] = true
+        vim.schedule(function()
+          pending[bufnr] = nil
+          if api.nvim_buf_is_valid(bufnr) then
+            handler.sync_width(bufnr)
+          end
+        end)
+      end
+    end
+  end,
+})
+
 api.nvim_create_autocmd("BufWipeout", {
   group = group,
   callback = function(args)
