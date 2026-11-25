@@ -1,6 +1,6 @@
 # ADR-0005: Require Neovim 0.11+
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-25
 **Deciders:** Maintainer
 

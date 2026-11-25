@@ -1,6 +1,6 @@
 # ADR-0004: Wrap to the narrowest window showing the buffer
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-25
 **Deciders:** Maintainer
 

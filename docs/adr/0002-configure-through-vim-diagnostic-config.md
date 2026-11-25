@@ -1,6 +1,6 @@
 # ADR-0002: Configure through `vim.diagnostic.config()`, no `setup()`
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-25
 **Deciders:** Maintainer
 
