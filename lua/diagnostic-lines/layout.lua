@@ -5,6 +5,8 @@
 --   local x = foo(bar, baz)
 --             │   └──── W: unused local 'bar'
 --             └──────── E: undefined global 'foo'
+local wrap = require("diagnostic-lines.wrap")
+
 local M = {}
 
 ---@class DiagnosticLines.Item
@@ -97,18 +99,10 @@ local function gutter(row, pending, upto)
   end
 end
 
---- Split a message into the lines it will occupy.
----@param message string
----@return string[]
-local function message_lines(message)
-  return vim.split(message, "\n", { plain = true })
-end
-
 ---@param items DiagnosticLines.Item[]
----@param width integer|nil Window text-area width (unused until wrapping lands).
+---@param width integer|nil Window text-area width; nil = don't wrap.
 ---@return DiagnosticLines.Row[]
 function M.build(items, width)
-  local _ = width
   if #items == 0 then
     return {}
   end
@@ -117,11 +111,15 @@ function M.build(items, width)
   local prefix_col = sorted[1].col + PREFIX_OFFSET
   local text_col = prefix_col + PREFIX_WIDTH
 
+  -- Every message starts at text_col, so they all share one wrap width.
+  local available = width and (width - text_col)
+  local wrap_width = (available and available >= M.MIN_WRAP_WIDTH) and available or nil
+
   local rows = {}
   for k, item in ipairs(sorted) do
     local hl = M.HL[item.severity]
     local pending = pending_after(sorted, k)
-    local lines = message_lines(item.message)
+    local lines = wrap.wrap(item.message, wrap_width)
 
     local first = {}
     gutter(first, pending, item.col)

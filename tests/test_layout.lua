@@ -56,4 +56,41 @@ T["build()"]["empty message still gets a prefix"] = function()
   eq(rows_text(layout.build({ { col = 0, severity = HINT, message = "" } })), { "└──── H: " })
 end
 
+T["build() wrapping"] = MiniTest.new_set()
+
+T["build() wrapping"]["wraps to the space left after the prefix"] = function()
+  -- text starts at column 9, so width 19 leaves exactly MIN_WRAP_WIDTH (10)
+  eq(rows_text(layout.build({ { col = 0, severity = ERROR, message = "aaa bbb ccc ddd" } }, 19)), {
+    "└──── E: aaa bbb",
+    "         ccc ddd",
+  })
+end
+
+T["build() wrapping"]["does not wrap below MIN_WRAP_WIDTH"] = function()
+  eq(rows_text(layout.build({ { col = 0, severity = ERROR, message = "aaa bbb ccc ddd" } }, 18)), {
+    "└──── E: aaa bbb ccc ddd",
+  })
+  eq(rows_text(layout.build({ { col = 0, severity = ERROR, message = "aaa bbb ccc ddd" } }, 15)), {
+    "└──── E: aaa bbb ccc ddd",
+  })
+end
+
+T["build() wrapping"]["pending connectors continue through wrapped lines"] = function()
+  eq(
+    rows_text(layout.build({
+      { col = 10, severity = ERROR, message = "undefined global 'foo'" },
+      {
+        col = 14,
+        severity = WARN,
+        message = "this is a very long message that would otherwise run off the edge of the window",
+      },
+    }, 63)),
+    {
+      "          │   └──── W: this is a very long message that would",
+      "          │            otherwise run off the edge of the window",
+      "          └──────── E: undefined global 'foo'",
+    }
+  )
+end
+
 return T
