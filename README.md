@@ -70,7 +70,7 @@ filtering work as they do for core handlers.
 | Option | Default | Meaning |
 |---|---|---|
 | `wrap` | `true` | Wrap long messages to fit the window. |
-| `format` | `nil` | `function(diagnostic): string` that replaces the message text. |
+| `format` | `nil` | `function(diagnostic): string?` that replaces the message text. Return `nil` to hide that diagnostic, as with core's `format`. |
 
 Toggle it off and on:
 

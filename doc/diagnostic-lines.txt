@@ -50,8 +50,9 @@ Options:
     wrap      boolean (default: true)
               Wrap long messages to fit the window.
 
-    format    function(diagnostic): string (default: nil)
-              Replaces the message text shown for a diagnostic.
+    format    function(diagnostic): string? (default: nil)
+              Replaces the message text shown for a diagnostic. Return
+              nil to hide that diagnostic, as with the built-in format.
 
 Toggle the handler: >lua
 
